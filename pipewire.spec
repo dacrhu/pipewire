@@ -113,8 +113,8 @@ BuildRequires:  libusb-devel
 BuildRequires:  readline-devel
 
 # AptX
-BuildRequires:  libfreeaptx-devel
-Requires:       libfreeaptx
+#BuildRequires:  libfreeaptx-devel
+#Requires:       libfreeaptx
 
 Requires(pre):  shadow-utils
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
@@ -337,7 +337,7 @@ cp %{SOURCE1} subprojects/packagefiles/
     -D docs=enabled -D man=enabled -D gstreamer=enabled -D systemd=enabled	\
     -D gstreamer-device-provider=disabled -D sdl2=disabled 			\
     -D audiotestsrc=disabled -D videotestsrc=disabled				\
-    -D volume=disabled -D bluez5-codec-aptx=enabled -D roc=disabled 		\
+    -D volume=disabled -D bluez5-codec-aptx=disabled -D roc=disabled 		\
 %ifarch s390x
     -D bluez5-codec-ldac=disabled						\
 %endif
