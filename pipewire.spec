@@ -482,7 +482,7 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_datadir}/alsa-card-profile/mixer/paths/
 %{_datadir}/alsa-card-profile/mixer/profile-sets/
 #%dir %{_datadir}/spa-0.2/
-%{_datadir}/spa-0.2/bluez5/bluez-hardware.conf
+#%{_datadir}/spa-0.2/bluez5/bluez-hardware.conf
 %{_prefix}/lib/udev/rules.d/90-pipewire-alsa.rules
 %dir %{_libdir}/spa-%{spaversion}
 %{_libdir}/spa-%{spaversion}/alsa/
