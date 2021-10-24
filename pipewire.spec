@@ -345,7 +345,7 @@ cp %{SOURCE1} subprojects/packagefiles/
     %{!?with_jack:-D pipewire-jack=disabled} 					\
     %{!?with_jackserver_plugin:-D jack=disabled} 				\
     %{!?with_libcamera_plugin:-D libcamera=disabled} 				\
-    %{?with_jack:-D jack-devel=true} 					\
+    %{?with_jack:-D jack-devel=enabled} 					\
     %{!?with_alsa:-D pipewire-alsa=disabled}					\
     %{?with_vulkan:-D vulkan=enabled}
 %meson_build
