@@ -65,13 +65,13 @@ Source0:        https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/%{ver
 Source1:        https://gitlab.freedesktop.org/pipewire/media-session/-/archive/%{ms_version}/media-session-%{ms_version}.tar.gz
 
 ## upstream patches
-Patch0001:      0001-cpu-fix-compilation-on-some-architectures.patch
+#Patch0001:      0001-cpu-fix-compilation-on-some-architectures.patch
 
 ## upstreamable patches
 
 ## fedora patches
-Patch1001:      0001-Build-media-session-from-local-tarbal.patch
-Patch1002:      0001-conf-start-media-session-through-pipewire.patch
+#Patch1001:      0001-Build-media-session-from-local-tarbal.patch
+#Patch1002:      0001-conf-start-media-session-through-pipewire.patch
 
 BuildRequires:  gettext
 BuildRequires:  meson >= 0.49.0
