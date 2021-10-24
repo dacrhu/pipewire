@@ -391,10 +391,10 @@ rm %{buildroot}%{_datadir}/pipewire/media-session.d/with-pulseaudio
 
 %endif
 
-%find_lang %{name}
-%if %{with media_session}
-%find_lang media-session
-%endif
+#%find_lang %{name}
+#%if %{with media_session}
+#%find_lang media-session
+#%endif
 
 # upstream should use udev.pc
 mkdir -p %{buildroot}%{_prefix}/lib/udev/rules.d
