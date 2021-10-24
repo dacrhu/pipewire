@@ -515,7 +515,7 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %files utils
 %{_bindir}/pw-mon
 %{_bindir}/pw-metadata
-%{_bindir}/pw-dsdplay
+#%{_bindir}/pw-dsdplay
 %{_bindir}/pw-mididump
 %{_bindir}/pw-midiplay
 %{_bindir}/pw-midirecord
