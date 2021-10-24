@@ -6,14 +6,13 @@
 %global spaversion   0.2
 %global soversion    0
 %global libversion   %{soversion}.%(bash -c '((intversion = (%{minorversion} * 100) + %{microversion})); echo ${intversion}').0
-%global ms_version   0.4.0
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 3
+%global baserelease 2
 
-#global snapdate   20210107
-#global gitcommit  b17db2cebc1a5ab2c01851d29c05f79cd2f262bb
-#global shortcommit %%(c=%%{gitcommit}; echo ${c:0:7})
+#%%global snapdate   20210714
+#%%global gitcommit
+#%%global shortcommit %%(c=%%{gitcommit}; echo ${c:0:7})
 
 # https://bugzilla.redhat.com/983606
 %global _hardened_build 1
@@ -23,7 +22,6 @@
 
 # Build conditions for various features
 %bcond_without alsa
-%bcond_without media_session
 %bcond_without vulkan
 
 # Features disabled for RHEL 8
@@ -42,15 +40,6 @@
 %bcond_without jackserver_plugin
 %endif
 
-# Disabled for RHEL < 10 and Fedora < 36
-%if (0%{?rhel} && 0%{?rhel} < 10) || (0%{?fedora} && 0%{?fedora} < 36)
-%bcond_with libcamera_plugin
-%else
-%bcond_without libcamera_plugin
-%endif
-
-%bcond_without v4l2
-
 Name:           pipewire
 Summary:        Media Sharing Server
 Version:        %{majorversion}.%{minorversion}.%{microversion}
@@ -58,20 +47,17 @@ Release:        %{baserelease}%{?snapdate:.%{snapdate}git%{shortcommit}}%{?dist}
 License:        MIT
 URL:            https://pipewire.org/
 %if 0%{?snapdate}
-Source0:        https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/%{gitcommit}/pipewire-%{shortcommit}.tar.gz
+Source0:        https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/%{gitcommit}/pipewire-git%{shortcommit}.tar.gz
 %else
 Source0:        https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/%{version}/pipewire-%{version}.tar.gz
 %endif
-Source1:        https://gitlab.freedesktop.org/pipewire/media-session/-/archive/%{ms_version}/media-session-%{ms_version}.tar.gz
 
 ## upstream patches
-#Patch0001:      0001-cpu-fix-compilation-on-some-architectures.patch
 
 ## upstreamable patches
 
 ## fedora patches
-#Patch1001:      0001-Build-media-session-from-local-tarbal.patch
-#Patch1002:      0001-conf-start-media-session-through-pipewire.patch
+Patch1001:      0001-conf-start-media-session-through-pipewire.patch
 
 BuildRequires:  gettext
 BuildRequires:  meson >= 0.49.0
@@ -101,7 +87,7 @@ BuildRequires:  systemd-devel >= 184
 BuildRequires:  alsa-lib-devel
 BuildRequires:  libv4l-devel
 BuildRequires:  doxygen
-BuildRequires:  python-docutils
+BuildRequires:  xmltoman
 BuildRequires:  graphviz
 BuildRequires:  sbc-devel
 BuildRequires:  libsndfile-devel
@@ -110,12 +96,10 @@ BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  avahi-devel
 BuildRequires:  pkgconfig(webrtc-audio-processing) >= 0.2
 BuildRequires:  libusb-devel
-BuildRequires:  readline-devel
-BuildRequires:  xmltoman
 
 # AptX
-#BuildRequires:  libfreeaptx-devel
-#Requires:       libfreeaptx
+BuildRequires:  libopenaptx-devel
+Requires:       libopenaptx
 
 Requires(pre):  shadow-utils
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
@@ -123,8 +107,6 @@ Requires:       systemd >= 184
 Requires:       rtkit
 # A virtual Provides so we can swap session managers
 Requires:       pipewire-session-manager
-# Prefer WirePlumber for session manager
-Suggests:       wireplumber
 
 %description
 PipeWire is a multimedia server for Linux and other Unix like operating
@@ -174,14 +156,11 @@ Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 %description utils
 This package contains command line utilities for the PipeWire media server.
 
-%if %{with media_session}
 %package media-session
 Summary:        PipeWire Media Session Manager
 License:        MIT
 Recommends:     %{name}%{?_isa} = %{version}-%{release}
 Obsoletes:      %{name}-libpulse < %{version}-%{release}
-# before 0.3.30-5 the session manager was in the main pipewire package
-Conflicts:      %{name}%{?_isa} < 0.3.30-5
 
 # Virtual Provides to support swapping between PipeWire session manager implementations
 Provides:       pipewire-session-manager
@@ -190,7 +169,6 @@ Conflicts:      pipewire-session-manager
 %description media-session
 This package contains the reference Media Session Manager for the
 PipeWire media server.
-%endif
 
 %if %{with alsa}
 %package alsa
@@ -262,21 +240,6 @@ Requires:       jack-audio-connection-kit
 This package contains the PipeWire spa plugin to connect to a JACK server.
 %endif
 
-%if %{with libcamera_plugin}
-%package plugin-libcamera
-Summary:        PipeWire media server libcamera support
-License:        MIT
-BuildRequires:  libcamera-devel
-BuildRequires:  libdrm-devel
-Recommends:     %{name}%{?_isa} = %{version}-%{release}
-Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
-Requires:       libcamera
-Requires:       libdrm
-
-%description plugin-libcamera
-This package contains the PipeWire spa plugin to access cameras through libcamera.
-%endif
-
 %if %{with pulse}
 %package pulseaudio
 Summary:        PipeWire PulseAudio implementation
@@ -315,37 +278,20 @@ Provides:       pulseaudio-module-jack
 This package provides a PulseAudio implementation based on PipeWire
 %endif
 
-%if %{with v4l2}
-%package v4l2
-Summary:        PipeWire media server v4l2 LD_PRELOAD support
-License:        MIT
-Recommends:     %{name}%{?_isa} = %{version}-%{release}
-Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
-
-%description v4l2
-This package contains an LD_PRELOAD library that redirects v4l2 applications to
-PipeWire.
-%endif
-
 %prep
-%autosetup -p1 %{?snapdate:-n %{name}-%{gitcommit}}
-
-mkdir subprojects/packagefiles
-cp %{SOURCE1} subprojects/packagefiles/
+%autosetup -p1 -n %{name}
 
 %build
 %meson \
     -D docs=enabled -D man=enabled -D gstreamer=enabled -D systemd=enabled	\
     -D gstreamer-device-provider=disabled -D sdl2=disabled 			\
-    -D audiotestsrc=disabled -D videotestsrc=disabled				\
-    -D volume=disabled -D bluez5-codec-aptx=disabled -D roc=disabled 		\
+    -D libcamera=disabled -D audiotestsrc=disabled -D videotestsrc=disabled	\
+    -D volume=disabled -D bluez5-codec-aptx=enabled -D roc=disabled		\
 %ifarch s390x
     -D bluez5-codec-ldac=disabled						\
 %endif
-    %{!?with_media_session:-D session-managers=[]} 				\
     %{!?with_jack:-D pipewire-jack=disabled} 					\
     %{!?with_jackserver_plugin:-D jack=disabled} 				\
-    %{!?with_libcamera_plugin:-D libcamera=disabled} 				\
     %{?with_jack:-D jack-devel=enabled} 					\
     %{!?with_alsa:-D pipewire-alsa=disabled}					\
     %{?with_vulkan:-D vulkan=enabled}
@@ -359,11 +305,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d/
 echo %{_libdir}/pipewire-%{apiversion}/jack/ > %{buildroot}%{_sysconfdir}/ld.so.conf.d/pipewire-jack-%{_arch}.conf
 %else
 rm %{buildroot}%{_datadir}/pipewire/jack.conf
-
-%if %{with media_session}
 rm %{buildroot}%{_datadir}/pipewire/media-session.d/with-jack
-%endif
-
 %endif
 
 %if %{with alsa}
@@ -372,29 +314,21 @@ cp %{buildroot}%{_datadir}/alsa/alsa.conf.d/50-pipewire.conf \
         %{buildroot}%{_sysconfdir}/alsa/conf.d/50-pipewire.conf
 cp %{buildroot}%{_datadir}/alsa/alsa.conf.d/99-pipewire-default.conf \
         %{buildroot}%{_sysconfdir}/alsa/conf.d/99-pipewire-default.conf
-
-%if %{with media_session}
 touch %{buildroot}%{_datadir}/pipewire/media-session.d/with-alsa
-%endif
-
 %endif
 
 %if ! %{with pulse}
 # If the PulseAudio replacement isn't being offered, delete the files
 rm %{buildroot}%{_bindir}/pipewire-pulse
 rm %{buildroot}%{_userunitdir}/pipewire-pulse.*
-rm %{buildroot}%{_datadir}/pipewire/pipewire-pulse.conf
-
-%if %{with media_session}
 rm %{buildroot}%{_datadir}/pipewire/media-session.d/with-pulseaudio
+rm %{buildroot}%{_datadir}/pipewire/pipewire-pulse.conf
 %endif
 
-%endif
+# We don't start the media session with systemd yet
+rm %{buildroot}%{_userunitdir}/pipewire-media-session.*
 
-#%find_lang %{name}
-#%if %{with media_session}
-#%find_lang media-session
-#%endif
+%find_lang %{name}
 
 # upstream should use udev.pc
 mkdir -p %{buildroot}%{_prefix}/lib/udev/rules.d
@@ -434,11 +368,6 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %systemd_user_post pipewire-pulse.socket
 %endif
 
-%if %{with media_session}
-%post media-session
-%systemd_user_post pipewire-media-session.service
-%endif
-
 %files
 %license LICENSE COPYING
 %doc README.md
@@ -450,13 +379,12 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_datadir}/pipewire/filter-chain/*.conf
 %{_mandir}/man5/pipewire.conf.5*
 
-%if %{with media_session}
-#%files media-session -f media-session.lang
+%files media-session
 %{_bindir}/pipewire-media-session
-%{_userunitdir}/pipewire-media-session.service
 %dir %{_datadir}/pipewire/media-session.d/
 %{_datadir}/pipewire/media-session.d/alsa-monitor.conf
-#%{_datadir}/pipewire/media-session.d/bluez-monitor.conf
+%{_datadir}/pipewire/media-session.d/bluez-hardware.conf
+%{_datadir}/pipewire/media-session.d/bluez-monitor.conf
 %{_datadir}/pipewire/media-session.d/media-session.conf
 %{_datadir}/pipewire/media-session.d/v4l2-monitor.conf
 
@@ -470,9 +398,7 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_datadir}/pipewire/media-session.d/with-pulseaudio
 %endif
 
-%endif
-
-#%files libs -f %{name}.lang
+%files libs -f %{name}.lang
 %license LICENSE COPYING
 %doc README.md
 %{_libdir}/libpipewire-%{apiversion}.so.*
@@ -481,14 +407,12 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %dir %{_datadir}/alsa-card-profile/mixer/
 %{_datadir}/alsa-card-profile/mixer/paths/
 %{_datadir}/alsa-card-profile/mixer/profile-sets/
-#%dir %{_datadir}/spa-0.2/
-#%{_datadir}/spa-0.2/bluez5/bluez-hardware.conf
 %{_prefix}/lib/udev/rules.d/90-pipewire-alsa.rules
 %dir %{_libdir}/spa-%{spaversion}
 %{_libdir}/spa-%{spaversion}/alsa/
 %{_libdir}/spa-%{spaversion}/audioconvert/
 %{_libdir}/spa-%{spaversion}/audiomixer/
-#%{_libdir}/spa-%{spaversion}/bluez5/
+%{_libdir}/spa-%{spaversion}/bluez5/
 %{_libdir}/spa-%{spaversion}/control/
 %{_libdir}/spa-%{spaversion}/support/
 %{_libdir}/spa-%{spaversion}/v4l2/
@@ -515,7 +439,6 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %files utils
 %{_bindir}/pw-mon
 %{_bindir}/pw-metadata
-#%{_bindir}/pw-dsdplay
 %{_bindir}/pw-mididump
 %{_bindir}/pw-midiplay
 %{_bindir}/pw-midirecord
@@ -577,11 +500,6 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_libdir}/spa-%{spaversion}/jack/
 %endif
 
-%if %{with libcamera_plugin}
-%files plugin-libcamera
-%{_libdir}/spa-%{spaversion}/libcamera/
-%endif
-
 %if %{with pulse}
 %files pulseaudio
 %{_bindir}/pipewire-pulse
@@ -589,82 +507,13 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_datadir}/pipewire/pipewire-pulse.conf
 %endif
 
-#%if %{with v4l2}
-#%files v4l2
-#%{_bindir}/pw-v4l2
-#%{_libdir}/pipewire-%{apiversion}/v4l2/libpw-v4l2.so
-#%endif
-
 %changelog
-* Thu Oct 21 2021 Patrick Laimbock <patrick@laimbock.com> - 0.3.39-3
-- add patch from 0.3.38 to start media-session through pipewire
+* Tue Jul 20 2021 Patrick Laimbock <patrick@laimbock.com> - 0.3.32-2
+- update to version 0.3.32
+- add libopenaptx for AptX support
 
-* Thu Oct 21 2021 Patrick Laimbock <patrick@laimbock.com> - 0.3.39-2
-- build for F34
-- enable AptX
-
-* Thu Oct 21 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.39-1
-- Update version to 0.3.39
-
-* Wed Oct 13 2021 Neal Gompa <ngompa@fedoraproject.org> - 0.3.38-2
-- Fix libcamera bcond to work properly in RHEL10+ and F36+
-
-* Thu Sep 30 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.38-1
-- Update version to 0.3.38
-
-* Wed Sep 29 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.37-3
-- Rebuild for new libcamera
-
-* Thu Sep 23 2021 Javier Martinez Canillas <javierm@redhat.com> - 0.3.37-2
-- Enable libcamera SPA plugin
-
-* Thu Sep 23 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.37-1
-- Update version to 0.3.37
-
-* Thu Sep 16 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.36-2
-- Update version to 0.3.36
-
-* Thu Sep 16 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.36-1
-- Update to 0.3.36
-- Do systemd post install of pipewire-media-session.service
-
-* Thu Sep 09 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.35-2
-- Add patch to fix passthrough check.
-
-* Thu Sep 09 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.35-1
-- Update to 0.3.35
-
-* Mon Aug 30 2021 Neal Gompa <ngompa@fedoraproject.org> - 0.3.34-2
-- Add preference for WirePlumber for session manager (#1989959)
-
-* Thu Aug 26 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.34-1
-- Update to 0.3.34
-
-* Wed Aug 11 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.33-3
-- Add more upstream patches.
-
-* Tue Aug 10 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.33-2
-- Add patch to fix default device persistence.
-
-* Thu Aug 5 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.33-1
-- Update to 0.3.33
-
-* Thu Aug 5 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.32-4
-- Add media-session Conflicts: with older pipewire versions, they can't be
-  installed at the same time because they both contain the media-session binary.
-
-* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 0.3.32-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
-
-* Wed Jul 21 2021 Neal Gompa <ngompa@fedoraproject.org> - 0.3.32-2
-- Add conditional for media-session subpackage
-
-* Tue Jul 20 2021 Wim Taymans <wtaymans@redhat.com> - 0.3.32-1
-- Update to 0.3.32
-
-* Thu Jul 15 2021 Peter Hutterer <peter.hutterer@redhat.com> - 0.3.31-4
-- Enable media-session.service, requires fedora-release-35-0.10 to enable the
-  service by default (#1976006).
+* Wed Jul 14 2021 Patrick Laimbock <patrick@laimbock.com> - 0.3.31-4
+- add libopenaptx for AptX support
 
 * Mon Jul 05 2021 Neal Gompa <ngompa13@gmail.com> - 0.3.31-3
 - Add "Conflicts: pipewire-session-manager" to pipewire-media-session
