@@ -451,7 +451,7 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_mandir}/man5/pipewire.conf.5*
 
 %if %{with media_session}
-%files media-session -f media-session.lang
+#%files media-session -f media-session.lang
 %{_bindir}/pipewire-media-session
 %{_userunitdir}/pipewire-media-session.service
 %dir %{_datadir}/pipewire/media-session.d/
@@ -472,7 +472,7 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 
 %endif
 
-%files libs -f %{name}.lang
+#%files libs -f %{name}.lang
 %license LICENSE COPYING
 %doc README.md
 %{_libdir}/libpipewire-%{apiversion}.so.*
