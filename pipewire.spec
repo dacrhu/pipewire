@@ -57,7 +57,7 @@ Source0:        https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/%{ver
 ## upstreamable patches
 
 ## fedora patches
-Patch1001:      0001-conf-start-media-session-through-pipewire.patch
+#Patch1001:      0001-conf-start-media-session-through-pipewire.patch
 
 BuildRequires:  gettext
 BuildRequires:  meson >= 0.49.0
