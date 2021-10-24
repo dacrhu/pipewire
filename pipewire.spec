@@ -456,7 +456,7 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_userunitdir}/pipewire-media-session.service
 %dir %{_datadir}/pipewire/media-session.d/
 %{_datadir}/pipewire/media-session.d/alsa-monitor.conf
-%{_datadir}/pipewire/media-session.d/bluez-monitor.conf
+#%{_datadir}/pipewire/media-session.d/bluez-monitor.conf
 %{_datadir}/pipewire/media-session.d/media-session.conf
 %{_datadir}/pipewire/media-session.d/v4l2-monitor.conf
 
@@ -481,14 +481,14 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %dir %{_datadir}/alsa-card-profile/mixer/
 %{_datadir}/alsa-card-profile/mixer/paths/
 %{_datadir}/alsa-card-profile/mixer/profile-sets/
-%dir %{_datadir}/spa-0.2/
+#%dir %{_datadir}/spa-0.2/
 %{_datadir}/spa-0.2/bluez5/bluez-hardware.conf
 %{_prefix}/lib/udev/rules.d/90-pipewire-alsa.rules
 %dir %{_libdir}/spa-%{spaversion}
 %{_libdir}/spa-%{spaversion}/alsa/
 %{_libdir}/spa-%{spaversion}/audioconvert/
 %{_libdir}/spa-%{spaversion}/audiomixer/
-%{_libdir}/spa-%{spaversion}/bluez5/
+#%{_libdir}/spa-%{spaversion}/bluez5/
 %{_libdir}/spa-%{spaversion}/control/
 %{_libdir}/spa-%{spaversion}/support/
 %{_libdir}/spa-%{spaversion}/v4l2/
