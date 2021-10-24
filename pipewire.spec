@@ -3,7 +3,7 @@
 %global microversion 32
 
 %global apiversion   0.3
-%global spaversion   0.2
+%global spaversion   0
 %global soversion    0
 %global libversion   %{soversion}.%(bash -c '((intversion = (%{minorversion} * 100) + %{microversion})); echo ${intversion}').0
 
