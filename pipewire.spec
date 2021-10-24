@@ -589,11 +589,11 @@ systemctl --no-reload preset --global pipewire.socket >/dev/null 2>&1 || :
 %{_datadir}/pipewire/pipewire-pulse.conf
 %endif
 
-%if %{with v4l2}
-%files v4l2
-%{_bindir}/pw-v4l2
-%{_libdir}/pipewire-%{apiversion}/v4l2/libpw-v4l2.so
-%endif
+#%if %{with v4l2}
+#%files v4l2
+#%{_bindir}/pw-v4l2
+#%{_libdir}/pipewire-%{apiversion}/v4l2/libpw-v4l2.so
+#%endif
 
 %changelog
 * Thu Oct 21 2021 Patrick Laimbock <patrick@laimbock.com> - 0.3.39-3
